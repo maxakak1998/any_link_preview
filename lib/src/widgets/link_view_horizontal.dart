@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
-class LinkViewHorizontal extends StatelessWidget {
+class LinkViewHorizontal extends StatefulWidget {
   final String url;
   final String title;
   final String description;
@@ -14,6 +14,7 @@ class LinkViewHorizontal extends StatelessWidget {
   final int? bodyMaxLines;
   final double? radius;
   final Color? bgColor;
+  final Widget errorWidget;
 
   LinkViewHorizontal({
     Key? key,
@@ -29,7 +30,15 @@ class LinkViewHorizontal extends StatelessWidget {
     this.bodyMaxLines,
     this.bgColor,
     this.radius,
+    this.errorWidget = const SizedBox(),
   }) : super(key: key);
+
+  @override
+  State<LinkViewHorizontal> createState() => _LinkViewHorizontalState();
+}
+
+class _LinkViewHorizontalState extends State<LinkViewHorizontal> {
+  bool _isError = false;
 
   double computeTitleFontSize(double width) {
     var size = width * 0.13;
@@ -58,49 +67,61 @@ class LinkViewHorizontal extends StatelessWidget {
         var layoutWidth = constraints.biggest.width;
         var layoutHeight = constraints.biggest.height;
 
-        var _titleFontSize = titleTextStyle ??
+        var _titleFontSize = widget.titleTextStyle ??
             TextStyle(
               fontSize: computeTitleFontSize(layoutWidth),
               color: Colors.black,
               fontWeight: FontWeight.bold,
             );
-        var _bodyFontSize = bodyTextStyle ??
+        var _bodyFontSize = widget.bodyTextStyle ??
             TextStyle(
               fontSize: computeTitleFontSize(layoutWidth) - 1,
               color: Colors.grey,
               fontWeight: FontWeight.w400,
             );
 
-        ImageProvider? _img = imageUri != '' ? NetworkImage(imageUri) : null;
-        if (imageUri.startsWith('data:image')) {
+        ImageProvider? _img = widget.imageUri != '' ? NetworkImage(widget.imageUri) : null;
+        if (widget.imageUri.startsWith('data:image')) {
           _img = MemoryImage(
-            base64Decode(imageUri.substring(imageUri.indexOf('base64') + 7)),
+            base64Decode(widget.imageUri.substring(widget.imageUri.indexOf('base64') + 7)),
           );
         }
 
         return InkWell(
-          onTap: () => onTap(),
+          onTap: () => widget.onTap(),
           child: Row(
             children: <Widget>[
-              showMultiMedia!
+              widget.showMultiMedia!
                   ? Expanded(
                       flex: 2,
                       child: _img == null
-                          ? Container(color: bgColor ?? Colors.grey)
+                          ? Container(color: widget.bgColor ?? Colors.grey)
                           : Container(
                               margin: EdgeInsets.only(right: 5),
                               decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  image: _img,
-                                  fit: BoxFit.cover,
-                                ),
-                                borderRadius: radius == 0
+                                image: _isError
+                                    ? null
+                                    : DecorationImage(
+                                        image: _img,
+                                        fit: BoxFit.cover,
+                                        onError: (e, s) {
+                                          if (!_isError) {
+                                            setState(() {
+                                              print(
+                                                  'Preview link image error is $e');
+                                            });
+                                            _isError = true;
+                                          }
+                                        },
+                                      ),
+                                borderRadius: widget.radius == 0
                                     ? BorderRadius.zero
                                     : BorderRadius.only(
-                                        topLeft: Radius.circular(radius!),
-                                        bottomLeft: Radius.circular(radius!),
+                                        topLeft: Radius.circular(widget.radius!),
+                                        bottomLeft: Radius.circular(widget.radius!),
                                       ),
                               ),
+                              child: _isError ? widget.errorWidget : const SizedBox(),
                             ),
                     )
                   : SizedBox(width: 5),
@@ -134,7 +155,7 @@ class LinkViewHorizontal extends StatelessWidget {
           Container(
             alignment: Alignment(-1.0, -1.0),
             child: Text(
-              title,
+              widget.title,
               style: _titleTS,
               overflow: TextOverflow.ellipsis,
               maxLines: _maxLines,
@@ -156,11 +177,11 @@ class LinkViewHorizontal extends StatelessWidget {
               child: Container(
                 alignment: Alignment(-1.0, -1.0),
                 child: Text(
-                  description,
+                  widget.description,
                   textAlign: TextAlign.left,
                   style: _bodyTS,
-                  overflow: bodyTextOverflow ?? TextOverflow.ellipsis,
-                  maxLines: bodyMaxLines ?? _maxLines,
+                  overflow: widget.bodyTextOverflow ?? TextOverflow.ellipsis,
+                  maxLines: widget.bodyMaxLines ?? _maxLines,
                 ),
               ),
             ),

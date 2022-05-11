@@ -286,6 +286,7 @@ class _AnyLinkPreviewState extends State<AnyLinkPreview> {
       height: _height,
       child: (widget.displayDirection == uiDirection.uiDirectionHorizontal)
           ? LinkViewHorizontal(
+              errorWidget: widget.errorWidget ?? const SizedBox(),
               key: widget.key ?? Key(widget.link.toString()),
               url: widget.link,
               title: title!,
@@ -301,6 +302,7 @@ class _AnyLinkPreviewState extends State<AnyLinkPreview> {
               radius: widget.borderRadius ?? 12,
             )
           : LinkViewVertical(
+              errorWidget: widget.errorWidget ?? const SizedBox(),
               key: widget.key ?? Key(widget.link.toString()),
               url: widget.link,
               title: title!,
