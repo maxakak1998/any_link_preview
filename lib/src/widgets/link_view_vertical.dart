@@ -38,7 +38,7 @@ class LinkViewVertical extends StatefulWidget {
 }
 
 class _LinkViewVerticalState extends State<LinkViewVertical> {
-   bool _isError = false;
+  bool _isError = false;
 
   double computeTitleFontSize(double height) {
     var size = height * 0.13;
@@ -106,13 +106,14 @@ class _LinkViewVerticalState extends State<LinkViewVertical> {
                                     ? null
                                     : DecorationImage(
                                         image: _img,
-                                        onError: (e, s) {
-                                          if(!_isError) {
+                                        onError: (e, s) async{
+                                          if (!_isError) {
+                                            await WidgetsBinding.instance?.endOfFrame;
                                             setState(() {
-                                            print(
-                                                'Preview link image error is $e');
-                                          });
-                                          _isError=true;
+                                              print(
+                                                  'Preview link image error is $e');
+                                            });
+                                            _isError = true;
                                           }
                                         },
                                         fit: BoxFit.fitWidth,
