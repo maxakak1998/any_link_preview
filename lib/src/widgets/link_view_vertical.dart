@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
-class LinkViewVertical extends StatefulWidget {
+class LinkViewVertical extends StatelessWidget {
   final String url;
   final String title;
   final String description;
@@ -14,7 +14,6 @@ class LinkViewVertical extends StatefulWidget {
   final int? bodyMaxLines;
   final double? radius;
   final Color? bgColor;
-  final Widget errorWidget;
 
   LinkViewVertical({
     Key? key,
@@ -30,15 +29,7 @@ class LinkViewVertical extends StatefulWidget {
     this.bodyMaxLines,
     this.bgColor,
     this.radius,
-    this.errorWidget = const SizedBox(),
   }) : super(key: key);
-
-  @override
-  State<LinkViewVertical> createState() => _LinkViewVerticalState();
-}
-
-class _LinkViewVerticalState extends State<LinkViewVertical> {
-  bool _isError = false;
 
   double computeTitleFontSize(double height) {
     var size = height * 0.13;
@@ -62,78 +53,61 @@ class _LinkViewVerticalState extends State<LinkViewVertical> {
       var layoutWidth = constraints.biggest.width;
       var layoutHeight = constraints.biggest.height;
 
-      var _titleTS = widget.titleTextStyle ??
+      var titleTS_ = titleTextStyle ??
           TextStyle(
             fontSize: computeTitleFontSize(layoutHeight),
             color: Colors.black,
             fontWeight: FontWeight.bold,
           );
-      var _bodyTS = widget.bodyTextStyle ??
+      var bodyTS_ = bodyTextStyle ??
           TextStyle(
             fontSize: computeTitleFontSize(layoutHeight) - 1,
             color: Colors.grey,
             fontWeight: FontWeight.w400,
           );
 
-      ImageProvider? _img =
-          widget.imageUri != '' ? NetworkImage(widget.imageUri) : null;
-      if (widget.imageUri.startsWith('data:image')) {
-        _img = MemoryImage(
-          base64Decode(
-              widget.imageUri.substring(widget.imageUri.indexOf('base64') + 7)),
+      ImageProvider? img_ = imageUri != '' ? NetworkImage(imageUri) : null;
+      if (imageUri.startsWith('data:image')) {
+        img_ = MemoryImage(
+          base64Decode(imageUri.substring(imageUri.indexOf('base64') + 7)),
         );
       }
 
       return InkWell(
-          onTap: () => widget.onTap(),
+          onTap: () => onTap(),
           child: Column(
             children: <Widget>[
-              widget.showMultiMedia!
+              showMultiMedia!
                   ? Expanded(
                       flex: 2,
-                      child: _img == null
-                          ? Container(color: widget.bgColor ?? Colors.grey)
+                      child: img_ == null
+                          ? Container(color: bgColor ?? Colors.grey)
                           : Container(
                               padding: EdgeInsets.only(bottom: 15),
                               decoration: BoxDecoration(
-                                borderRadius: widget.radius == 0
+                                borderRadius: radius == 0
                                     ? BorderRadius.zero
                                     : BorderRadius.only(
                                         topLeft: Radius.circular(12),
                                         topRight: Radius.circular(12),
                                       ),
-                                image: _isError
-                                    ? null
-                                    : DecorationImage(
-                                        image: _img,
-                                        onError: (e, s) async{
-                                          if (!_isError) {
-                                            await WidgetsBinding.instance?.endOfFrame;
-                                            setState(() {
-                                              print(
-                                                  'Preview link image error is $e');
-                                            });
-                                            _isError = true;
-                                          }
-                                        },
-                                        fit: BoxFit.fitWidth,
-                                      ),
+                                image: DecorationImage(
+                                  image: img_,
+                                  fit: BoxFit.fitWidth,
+                                ),
                               ),
-                              child: _isError
-                                  ? widget.errorWidget
-                                  : const SizedBox(),
                             ),
                     )
                   : SizedBox(height: 5),
               _buildTitleContainer(
-                  _titleTS, computeTitleLines(layoutHeight, layoutWidth)),
-              _buildBodyContainer(_bodyTS, computeBodyLines(layoutHeight)),
+                  titleTS_, computeTitleLines(layoutHeight, layoutWidth)),
+              _buildBodyContainer(bodyTS_, computeBodyLines(layoutHeight)),
             ],
           ));
     });
   }
 
-  Widget _buildTitleContainer(TextStyle _titleTS, _maxLines) {
+  Widget _buildTitleContainer(TextStyle titleTS_, int? maxLines_) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 5, 5, 1),
       child: Container(
@@ -142,10 +116,10 @@ class _LinkViewVerticalState extends State<LinkViewVertical> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              widget.title,
-              style: _titleTS,
+              title,
+              style: titleTS_,
               overflow: TextOverflow.ellipsis,
-              maxLines: _maxLines,
+              maxLines: maxLines_,
             ),
           ],
         ),
@@ -153,7 +127,7 @@ class _LinkViewVerticalState extends State<LinkViewVertical> {
     );
   }
 
-  Widget _buildBodyContainer(TextStyle _bodyTS, _maxLines) {
+  Widget _buildBodyContainer(TextStyle bodyTS_, int? maxLines_) {
     return Expanded(
       flex: 1,
       child: Padding(
@@ -161,10 +135,10 @@ class _LinkViewVerticalState extends State<LinkViewVertical> {
         child: Container(
           alignment: Alignment(-1.0, -1.0),
           child: Text(
-            widget.description,
-            style: _bodyTS,
-            overflow: widget.bodyTextOverflow ?? TextOverflow.ellipsis,
-            maxLines: widget.bodyMaxLines ?? _maxLines,
+            description,
+            style: bodyTS_,
+            overflow: bodyTextOverflow ?? TextOverflow.ellipsis,
+            maxLines: bodyMaxLines ?? maxLines_,
           ),
         ),
       ),

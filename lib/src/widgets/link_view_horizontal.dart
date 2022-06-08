@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
-class LinkViewHorizontal extends StatefulWidget {
+class LinkViewHorizontal extends StatelessWidget {
   final String url;
   final String title;
   final String description;
@@ -14,7 +14,6 @@ class LinkViewHorizontal extends StatefulWidget {
   final int? bodyMaxLines;
   final double? radius;
   final Color? bgColor;
-  final Widget errorWidget;
 
   LinkViewHorizontal({
     Key? key,
@@ -30,15 +29,7 @@ class LinkViewHorizontal extends StatefulWidget {
     this.bodyMaxLines,
     this.bgColor,
     this.radius,
-    this.errorWidget = const SizedBox(),
   }) : super(key: key);
-
-  @override
-  State<LinkViewHorizontal> createState() => _LinkViewHorizontalState();
-}
-
-class _LinkViewHorizontalState extends State<LinkViewHorizontal> {
-  bool _isError = false;
 
   double computeTitleFontSize(double width) {
     var size = width * 0.13;
@@ -67,61 +58,49 @@ class _LinkViewHorizontalState extends State<LinkViewHorizontal> {
         var layoutWidth = constraints.biggest.width;
         var layoutHeight = constraints.biggest.height;
 
-        var _titleFontSize = widget.titleTextStyle ??
+        var titleFontSize_ = titleTextStyle ??
             TextStyle(
               fontSize: computeTitleFontSize(layoutWidth),
               color: Colors.black,
               fontWeight: FontWeight.bold,
             );
-        var _bodyFontSize = widget.bodyTextStyle ??
+        var bodyFontSize_ = bodyTextStyle ??
             TextStyle(
               fontSize: computeTitleFontSize(layoutWidth) - 1,
               color: Colors.grey,
               fontWeight: FontWeight.w400,
             );
 
-        ImageProvider? _img = widget.imageUri != '' ? NetworkImage(widget.imageUri) : null;
-        if (widget.imageUri.startsWith('data:image')) {
-          _img = MemoryImage(
-            base64Decode(widget.imageUri.substring(widget.imageUri.indexOf('base64') + 7)),
+        ImageProvider? img_ = imageUri != '' ? NetworkImage(imageUri) : null;
+        if (imageUri.startsWith('data:image')) {
+          img_ = MemoryImage(
+            base64Decode(imageUri.substring(imageUri.indexOf('base64') + 7)),
           );
         }
 
         return InkWell(
-          onTap: () => widget.onTap(),
+          onTap: () => onTap(),
           child: Row(
             children: <Widget>[
-              widget.showMultiMedia!
+              showMultiMedia!
                   ? Expanded(
                       flex: 2,
-                      child: _img == null
-                          ? Container(color: widget.bgColor ?? Colors.grey)
+                      child: img_ == null
+                          ? Container(color: bgColor ?? Colors.grey)
                           : Container(
                               margin: EdgeInsets.only(right: 5),
                               decoration: BoxDecoration(
-                                image: _isError
-                                    ? null
-                                    : DecorationImage(
-                                        image: _img,
-                                        fit: BoxFit.cover,
-                                        onError: (e, s) {
-                                          if (!_isError) {
-                                            setState(() {
-                                              print(
-                                                  'Preview link image error is $e');
-                                            });
-                                            _isError = true;
-                                          }
-                                        },
-                                      ),
-                                borderRadius: widget.radius == 0
+                                image: DecorationImage(
+                                  image: img_,
+                                  fit: BoxFit.cover,
+                                ),
+                                borderRadius: radius == 0
                                     ? BorderRadius.zero
                                     : BorderRadius.only(
-                                        topLeft: Radius.circular(widget.radius!),
-                                        bottomLeft: Radius.circular(widget.radius!),
+                                        topLeft: Radius.circular(radius!),
+                                        bottomLeft: Radius.circular(radius!),
                                       ),
                               ),
-                              child: _isError ? widget.errorWidget : const SizedBox(),
                             ),
                     )
                   : SizedBox(width: 5),
@@ -133,9 +112,9 @@ class _LinkViewHorizontalState extends State<LinkViewHorizontal> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       _buildTitleContainer(
-                          _titleFontSize, computeTitleLines(layoutHeight)),
+                          titleFontSize_, computeTitleLines(layoutHeight)),
                       _buildBodyContainer(
-                          _bodyFontSize, computeBodyLines(layoutHeight))
+                          bodyFontSize_, computeBodyLines(layoutHeight))
                     ],
                   ),
                 ),
@@ -147,7 +126,7 @@ class _LinkViewHorizontalState extends State<LinkViewHorizontal> {
     );
   }
 
-  Widget _buildTitleContainer(TextStyle _titleTS, _maxLines) {
+  Widget _buildTitleContainer(TextStyle titleTS_, int? maxLines_) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 2, 3, 1),
       child: Column(
@@ -155,10 +134,10 @@ class _LinkViewHorizontalState extends State<LinkViewHorizontal> {
           Container(
             alignment: Alignment(-1.0, -1.0),
             child: Text(
-              widget.title,
-              style: _titleTS,
+              title,
+              style: titleTS_,
               overflow: TextOverflow.ellipsis,
-              maxLines: _maxLines,
+              maxLines: maxLines_,
             ),
           ),
         ],
@@ -166,7 +145,7 @@ class _LinkViewHorizontalState extends State<LinkViewHorizontal> {
     );
   }
 
-  Widget _buildBodyContainer(TextStyle _bodyTS, _maxLines) {
+  Widget _buildBodyContainer(TextStyle bodyTS_, int? maxLines_) {
     return Expanded(
       flex: 2,
       child: Padding(
@@ -177,11 +156,11 @@ class _LinkViewHorizontalState extends State<LinkViewHorizontal> {
               child: Container(
                 alignment: Alignment(-1.0, -1.0),
                 child: Text(
-                  widget.description,
+                  description,
                   textAlign: TextAlign.left,
-                  style: _bodyTS,
-                  overflow: widget.bodyTextOverflow ?? TextOverflow.ellipsis,
-                  maxLines: widget.bodyMaxLines ?? _maxLines,
+                  style: bodyTS_,
+                  overflow: bodyTextOverflow ?? TextOverflow.ellipsis,
+                  maxLines: bodyMaxLines ?? maxLines_,
                 ),
               ),
             ),
